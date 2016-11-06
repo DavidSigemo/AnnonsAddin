@@ -1,0 +1,32 @@
+﻿@*@model AnnonsAddinWeb.AdvertisementViewModel*@
+
+@section scripts{
+
+    @*<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+        <script src="@Url.Content("~/Scripts/jquery.unobtrusive-ajax.min.js")" type="text/javascript"></script>*@
+}
+@{
+    ViewBag.Title = "BuyAuctions";
+}
+<div class="container">
+    <add key="UnobtrusiveJavaScriptEnabled" value="true" />
+    <h3>Sök efter auktioner</h3>
+    @using (Ajax.BeginForm("SearchAuctions", "Advertisement", new AjaxOptions
+    {
+        InsertionMode = InsertionMode.Replace,
+        UpdateTargetId = "auctionSearchResult"
+    }))
+    {
+        <div class="col-md-4">
+            <div class="input-group">
+                @*@Html.Label("searchInput", "Sök efter auktioner")*@
+                @Html.TextBox("searchInput", null, new { @Class = "form-control" })
+                <span class="input-group-btn">
+                    <input class="btn btn-primary" id="submitBtn" type="submit" value="Sök" />
+                </span>
+            </div>
+        </div>
+    }
+
+    <div id="auctionSearchResult"></div>
+</div>

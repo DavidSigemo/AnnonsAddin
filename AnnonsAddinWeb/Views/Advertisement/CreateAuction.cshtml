@@ -1,0 +1,24 @@
+﻿@model AnnonsAddinWeb.AdvertisementViewModel
+
+@{
+    ViewBag.Title = "CreateAuction";
+}
+
+<div class="container">
+    @using (Html.BeginForm("PostAuction", "Advertisement", FormMethod.Post))
+    {
+        <div class="form-group">
+            @Html.LabelFor(model => model.Title)
+            @Html.TextBoxFor(model => model.Title, new { @Class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Text)
+            @Html.TextBoxFor(model => model.Text, new { @Class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Price)
+            @Html.TextBoxFor(model => model.Price, new { @Class = "form-control" })
+        </div>
+        <input id="submitBtn" type="submit" value="Skapa" class="btn btn-primary"/>
+    }
+</div>
