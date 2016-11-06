@@ -86,14 +86,14 @@ namespace AnnonsAddinWeb.Controllers
                         Field textField = newList.Fields.AddFieldAsXml("<Field DisplayName='Text' Type='Text' Name='Text' Required='TRUE' />", true, AddFieldOptions.AddFieldToDefaultView);
                         Field prisField = newList.Fields.AddFieldAsXml("<Field DisplayName='Pris' Type='Number' Name='Pris' Required='TRUE' />", true, AddFieldOptions.AddFieldToDefaultView);
                         Field datumField = newList.Fields.AddFieldAsXml("<Field DisplayName='Datum' Type='DateTime' Name='Datum' Required='TRUE' />", true, AddFieldOptions.AddFieldToDefaultView);
-                        Field anvandareField = newList.Fields.AddFieldAsXml("<Field DisplayName='Användare' Type='User' Name='Anvandare' StaticName='Anvandare' Required='TRUE' />", true, AddFieldOptions.AddFieldToDefaultView);
+                        //Field anvandareField = newList.Fields.AddFieldAsXml("<Field DisplayName='Användare' Type='User' Name='Anvandare' StaticName='Anvandare' Required='TRUE' />", true, AddFieldOptions.AddFieldToDefaultView);
                         Field kategoriField = newList.Fields.AddFieldAsXml("<Field DisplayName='Kategori' Type='TaxonomyFieldType' Name='Kategori' Required='TRUE' />", true, AddFieldOptions.AddFieldToDefaultView);
 
                         FieldNumber rubrikFieldNumber = clientContext.CastTo<FieldNumber>(rubrikField);
                         FieldNumber textFieldNumber = clientContext.CastTo<FieldNumber>(textField);
                         FieldNumber prisFieldNumber = clientContext.CastTo<FieldNumber>(prisField);
                         FieldNumber datumFieldNumber = clientContext.CastTo<FieldNumber>(datumField);
-                        FieldNumber anvandareFieldNumber = clientContext.CastTo<FieldNumber>(anvandareField);
+                        //FieldNumber anvandareFieldNumber = clientContext.CastTo<FieldNumber>(anvandareField);
                         //FieldNumber kategoryFieldNumber = clientContext.CastTo<FieldNumber>(anvandareField);
                         Guid termStoreId = Guid.Empty;
                         Guid termSetId = Guid.Empty;
@@ -108,7 +108,7 @@ namespace AnnonsAddinWeb.Controllers
                         textFieldNumber.Update();
                         prisFieldNumber.Update();
                         datumFieldNumber.Update();
-                        anvandareFieldNumber.Update();
+                        //anvandareFieldNumber.Update();
                         kategoryFieldNumber.Update();
 
                         View view = newList.Views.GetByTitle("All Items");
