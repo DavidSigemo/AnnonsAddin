@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 
-namespace AnnonsAddinWeb
+namespace AnnonsAddinWeb.ViewModels
 {
     public class AdvertisementViewModel
     {
@@ -16,5 +17,13 @@ namespace AnnonsAddinWeb
         public TaxonomyFieldValue Category { get; set; }
         public DateTime Date { get; set; }
         public FieldUserValue User { get; set; }
+
+        public string SelectedCategory { get; set; }
+        public List<SelectListItem> CategoryList { get; set; }
+
+        public AdvertisementViewModel()
+        {
+            CategoryList = new List<SelectListItem>();
+        }
     }
 }

@@ -1,8 +1,14 @@
-﻿@model AnnonsAddinWeb.AdvertisementViewModel
+﻿@using AnnonsAddinWeb.ViewModels
+@model AdvertisementViewModel
 
 @{
     ViewBag.Title = "ViewAuction";
 }
 
-<h2>ViewAuction</h2>
-
+<h2>@Model.Title</h2>
+<h2>@Model.Text</h2>
+<h2>@Model.Price</h2>
+<h2>@Model.Date</h2>
+<h2>@Model.Category.Label</h2>
+<h2>@Model.User.LookupValue</h2>
+<h2>@Model.User.Email</h2>

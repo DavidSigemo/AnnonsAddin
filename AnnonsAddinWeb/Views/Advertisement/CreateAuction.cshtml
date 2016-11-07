@@ -1,4 +1,5 @@
-﻿@model AnnonsAddinWeb.AdvertisementViewModel
+﻿@using AnnonsAddinWeb.ViewModels
+@model AdvertisementViewModel
 
 @{
     ViewBag.Title = "CreateAuction";
@@ -18,6 +19,10 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Price)
             @Html.TextBoxFor(model => model.Price, new { @Class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Category)
+            @Html.DropDownListFor(model => model.SelectedCategory, new SelectList(Model.CategoryList, "Value", "Text"), new { @Class = "form-control" })
         </div>
         <input id="submitBtn" type="submit" value="Skapa" class="btn btn-primary"/>
     }

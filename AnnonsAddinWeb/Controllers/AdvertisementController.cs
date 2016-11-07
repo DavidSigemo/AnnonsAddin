@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using AnnonsAddinWeb.ViewModels;
 
 namespace AnnonsAddinWeb.Controllers
 {
@@ -18,6 +19,7 @@ namespace AnnonsAddinWeb.Controllers
             if (spContext != null)
             {
                 Session["SpContext"] = spContext;
+                Session["SpHostUrl"] = spContext.SPHostUrl;
             } else
             {
                 spContext = Session["SpContext"] as SharePointContext;
@@ -252,9 +254,9 @@ namespace AnnonsAddinWeb.Controllers
             return PartialView("_AuctionSearchPartial", model);
         }
 
-        public ActionResult ViewAuction(int id)
+        public ActionResult ViewAuction(int id, string SpHostUrl)
         {
-            var model = new List<AdvertisementViewModel>();
+            var model = new AdvertisementViewModel();
             SharePointContext spContext = Session["SpContext"] as SharePointContext;
             using (var clientContext = spContext.CreateUserClientContextForSPHost())
             {
@@ -266,21 +268,62 @@ namespace AnnonsAddinWeb.Controllers
 
                 var list = listCol.FirstOrDefault();
                 var listItem = list.GetItemById(id);
-                if (list != null)
-                {
+                clientContext.Load(listItem);
+                clientContext.ExecuteQuery();
 
+                if (listItem != null)
+                {
+                    model = new AdvertisementViewModel
+                    {
+                        Title = listItem["Rubrik"].ToString(),
+                        Text = listItem["Text"].ToString(),
+                        Price = int.Parse(listItem["Pris"].ToString()),
+                        Date = DateTime.Parse(listItem["Datum"].ToString()),
+                        User = listItem["Author"] as FieldUserValue,
+                        Category = listItem["Kategori"] as TaxonomyFieldValue,
+                        ListItemId = listItem["ID"].ToString()
+
+                    };
                 }
-                return View();
+                return View(model);
             }
         }
+    
 
-        public ActionResult CreateAuction()
+
+    public ActionResult CreateAuction()
         {
             var model = new AdvertisementViewModel();
             var spContext = Session["SpContext"] as SharePointContext;
             using (var clientContext = spContext.CreateUserClientContextForSPHost())
             {
+                TaxonomySession taxonomySession = TaxonomySession.GetTaxonomySession(clientContext);
 
+                if (taxonomySession != null)
+                {
+
+                    TermStore termStore = taxonomySession.GetDefaultSiteCollectionTermStore();
+                    TermGroupCollection termGroupCol = termStore.Groups;
+                    clientContext.Load(termGroupCol, t => t.Where(y => y.Name == "Advertisements"));
+                    clientContext.ExecuteQuery();
+
+                    TermGroup termGroup = termGroupCol.FirstOrDefault();
+                    if (termGroup != null)
+                    {
+                        TermSet termSet = termGroup.TermSets.GetByName("Categories");
+                        TermCollection terms = termSet.GetAllTerms();
+                        clientContext.Load(termSet);
+                        clientContext.Load(terms);
+                        clientContext.ExecuteQuery();
+
+                        foreach (Term term in terms)
+                        {
+                            SelectListItem newItem = new SelectListItem { Value = term.Id.ToString(), Text=term.Name };
+                            model.CategoryList.Add(newItem);
+                        }
+                        
+                    }
+                }
             }
             return View(model);
         }
@@ -289,6 +332,30 @@ namespace AnnonsAddinWeb.Controllers
         public ActionResult PostAuction(AdvertisementViewModel model)
         {
             var spContext = Session["SpContext"] as SharePointContext;
+            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            {
+                ListCollection listCol = clientContext.Web.Lists;
+                User currentUser = clientContext.Web.CurrentUser;
+                clientContext.Load(listCol, y => y.Where(x => x.Title == "Annonser"));
+                clientContext.Load(currentUser);
+                clientContext.ExecuteQuery();
+
+                var list = listCol.FirstOrDefault();
+                if (list != null)
+                {
+                    ListItemCreationInformation newAdvertisementInfo = new ListItemCreationInformation();
+                    ListItem newAdvertisement = list.AddItem(newAdvertisementInfo);
+                    newAdvertisement["Rubrik"] = model.Title;
+                    newAdvertisement["Text"] = model.Text;
+                    newAdvertisement["Pris"] = model.Price;
+                    newAdvertisement["Datum"] = DateTime.Now;
+                    newAdvertisement["Anv_x00e4_ndare"] = clientContext.Web.CurrentUser;
+                    newAdvertisement["Kategori"] = model.SelectedCategory;
+
+                    newAdvertisement.Update();
+                    clientContext.ExecuteQuery();
+                }
+            }
             return RedirectToAction("Index", new { SPHostUrl = spContext.SPHostUrl });
         }
     }
