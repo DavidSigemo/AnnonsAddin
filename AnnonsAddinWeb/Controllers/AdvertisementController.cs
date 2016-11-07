@@ -15,7 +15,13 @@ namespace AnnonsAddinWeb.Controllers
         {
             var model = new List<AdvertisementViewModel>();
             var spContext = SharePointContextProvider.Current.GetSharePointContext(HttpContext);
-            Session["SpContext"] = spContext;
+            if (spContext != null)
+            {
+                Session["SpContext"] = spContext;
+            } else
+            {
+                spContext = Session["SpContext"] as SharePointContext;
+            }
             using (var clientContext = spContext.CreateUserClientContextForSPHost())
             {
                 if (clientContext != null)
@@ -202,42 +208,26 @@ namespace AnnonsAddinWeb.Controllers
                 {
                     CamlQuery cQuery = new CamlQuery();
                     cQuery.ViewXml = @"<View>
-	                                        <Query>
-		                                        <Where>
-			                                        <And>
-				                                        <Neq>
-					                                        <FieldRef Name='Author' LookupId='True'/>
-					                                        <Value Type='Lookup'>" + currentUser.Id + @"</Value>
-				                                        </Neq>
-			                                        </And>
-			                                        <And>
-				                                        <Or>
-					                                        <Contains>
-						                                        <FieldRef Name='Rubrik'></FieldRef>
-						                                        <Value Type='Text'>" + searchInput + @"</Value>
-					                                        </Contains>
-				                                        </Or>
-				                                        <Or>
-					                                        <Contains>
-						                                        <FieldRef Name='Text'></FieldRef>
-						                                        <Value Type='Text'>" + searchInput + @"</Value>
-					                                        </Contains>
-				                                        </Or>
-				                                        <Or>
-					                                        <Contains>
-						                                        <FieldRef Name='Author'></FieldRef>
-						                                        <Value Type='Lookup'>" + searchInput + @"</Value>
-					                                        </Contains>
-				                                        </Or>
-				                                        <Or>
-					                                        <Contains>
-						                                        <FieldRef Name='Kategori'></FieldRef>
-						                                        <Value Type='Text'>" + searchInput + @"</Value>
-					                                        </Contains>
-				                                        </Or>
-			                                        </And>
-		                                        </Where>
-	                                        </Query>
+                                            <Query>
+                                                <Where>
+                                                    <And>
+                                                        <Neq>
+                                                            <FieldRef Name='Author' LookupId='True'/>
+                                                            <Value Type='Integer'><UserID/></Value>
+                                                        </Neq>
+                                                        <Or>
+                                                            <Contains>
+                                                                <FieldRef Name='Rubrik'/>
+                                                                <Value Type='Text'>" + searchInput + @"</Value>
+                                                            </Contains>
+                                                            <Contains>
+                                                                <FieldRef Name='Text'/>
+                                                                <Value Type='Text'>" + searchInput + @"</Value>
+                                                            </Contains>
+                                                        </Or>
+                                                    </And>
+                                                </Where>
+                                            </Query>
                                         </View>";
                     var listItems = list.GetItems(cQuery);
                     clientContext.Load(listItems);
@@ -287,14 +277,19 @@ namespace AnnonsAddinWeb.Controllers
         public ActionResult CreateAuction()
         {
             var model = new AdvertisementViewModel();
+            var spContext = Session["SpContext"] as SharePointContext;
+            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            {
 
+            }
             return View(model);
         }
 
         [HttpPost]
         public ActionResult PostAuction(AdvertisementViewModel model)
         {
-            return RedirectToAction("Index");
+            var spContext = Session["SpContext"] as SharePointContext;
+            return RedirectToAction("Index", new { SPHostUrl = spContext.SPHostUrl });
         }
     }
 }
