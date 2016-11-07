@@ -15,11 +15,11 @@
     {
         InsertionMode = InsertionMode.Replace,
         UpdateTargetId = "auctionSearchResult"
-    }))
+    }, new { @Class = "row" }))
     {
         <div class="col-md-4">
-            <div class="input-group">
-                @*@Html.Label("searchInput", "Sök efter auktioner")*@
+            @Html.Label("searchInput", "Sök efter auktioner")
+            <div class="input-group">                
                 @Html.TextBox("searchInput", null, new { @Class = "form-control" })
                 <span class="input-group-btn">
                     <input class="btn btn-primary" id="submitBtn" type="submit" value="Sök" />
@@ -28,5 +28,5 @@
         </div>
     }
     <br />
-    <div id="auctionSearchResult"><h4>Search results...</h4></div>
+    <div class="row" id="auctionSearchResult"><h4>Search results...</h4></div>
 </div>

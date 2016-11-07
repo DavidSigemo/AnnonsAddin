@@ -6,24 +6,45 @@
 }
 
 <div class="container">
-    @using (Html.BeginForm("PostAuction", "Advertisement", FormMethod.Post))
-    {
-        <div class="form-group">
-            @Html.LabelFor(model => model.Title)
-            @Html.TextBoxFor(model => model.Title, new { @Class = "form-control" })
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.Text)
-            @Html.TextBoxFor(model => model.Text, new { @Class = "form-control" })
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.Price)
-            @Html.TextBoxFor(model => model.Price, new { @Class = "form-control" })
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.Category)
-            @Html.DropDownListFor(model => model.SelectedCategory, new SelectList(Model.CategoryList, "Value", "Text"), new { @Class = "form-control" })
-        </div>
-        <input id="submitBtn" type="submit" value="Skapa" class="btn btn-primary"/>
-    }
+    <div class="jumbotron text-center">
+        @Html.ValidationSummary()
+        @using (Html.BeginForm("PostAuction", "Advertisement", FormMethod.Post))
+        {
+            <div class="row">
+                <div class="form-group col-md-4 col-md-offset-4">
+                    @Html.LabelFor(model => model.Title)
+                    @Html.TextBoxFor(model => model.Title, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Title, "Title is required!", new { @Class = "control-label has-error" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4 col-md-offset-4">
+                    @Html.LabelFor(model => model.Text)
+                    @Html.TextBoxFor(model => model.Text, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Text, "Text is required!", new { @Class = "control-label has-error" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-row col-md-4 col-md-offset-4">
+                    @Html.LabelFor(model => model.Price)
+                    <div class="input-group col-sm-6 col-sm-offset-3">
+                        @Html.TextBoxFor(model => model.Price, new { @Class = "form-control currency text-right", @Type = "number" })
+                        <span class="input-group-addon">SEK</span>
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Text, "Price field is empty or is required!", new { @Class = "control-label has-error" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4 col-md-offset-4">
+                    @Html.LabelFor(model => model.Category)
+                    @Html.DropDownListFor(model => model.SelectedCategory, new SelectList(Model.CategoryList, "Value", "Text"), new { @Class = "form-control" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <input id="submitBtn" type="submit" value="Skapa" class="btn btn-primary" />
+                </div>
+            </div>
+        }
+    </div>
 </div>

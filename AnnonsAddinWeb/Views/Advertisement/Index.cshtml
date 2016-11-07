@@ -6,7 +6,7 @@
 
 <div class="container">
     <h3>Mina annonser</h3>
-    <table class="table table-striped table-bordered table-hover">
+    <table class="table table-striped table-bordered table-hover table-responsive">
         <thead>
             <tr>
                 <th>Rubrik</th>
@@ -27,7 +27,7 @@
                     <td>@listItem.Date.ToShortDateString()</td>
                     <td>@listItem.Category.Label</td>
                     <td class="text-center">
-                        <button class="btn btn-default">Ta bort</button>
+                        <button class="btn btn-default" onclick='location.href="@Url.Action("DeleteAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'>Ta bort</button>
                     </td>
                 </tr>
             }

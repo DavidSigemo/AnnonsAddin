@@ -20,7 +20,8 @@ namespace AnnonsAddinWeb.Controllers
             {
                 Session["SpContext"] = spContext;
                 Session["SpHostUrl"] = spContext.SPHostUrl;
-            } else
+            }
+            else
             {
                 spContext = Session["SpContext"] as SharePointContext;
             }
@@ -35,7 +36,7 @@ namespace AnnonsAddinWeb.Controllers
                     clientContext.Load(listCol, y => y.Where(x => x.Title == "Annonser"));
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
-
+                    //List list = clientContext.Web.Lists.GetByTitle("Annonser");     Fungerar utan lista??
 
                     if (taxonomySession != null)
                     {
@@ -182,6 +183,22 @@ namespace AnnonsAddinWeb.Controllers
             termSetId = termSets.FirstOrDefault().Id;
         }
 
+        public ActionResult DeleteAdvertisement(int id, string SpHostUrl)
+        {
+            var model = new AdvertisementViewModel();
+            SharePointContext spContext = Session["SpContext"] as SharePointContext;
+            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            {
+                List list = clientContext.Web.Lists.GetByTitle("Annonser");
+                var listItem = list.GetItemById(id);
+                listItem.DeleteObject();
+
+                clientContext.ExecuteQuery();
+
+                return RedirectToAction("Index", new { SpHostUrl = SpHostUrl });
+            }
+        }
+
         public ActionResult BuyAuctions()
         {
             //SharePointContext spContext = Session["SpContext"] as SharePointContext;
@@ -209,28 +226,7 @@ namespace AnnonsAddinWeb.Controllers
                 if (list != null)
                 {
                     CamlQuery cQuery = new CamlQuery();
-                    cQuery.ViewXml = @"<View>
-                                            <Query>
-                                                <Where>
-                                                    <And>
-                                                        <Neq>
-                                                            <FieldRef Name='Author' LookupId='True'/>
-                                                            <Value Type='Integer'><UserID/></Value>
-                                                        </Neq>
-                                                        <Or>
-                                                            <Contains>
-                                                                <FieldRef Name='Rubrik'/>
-                                                                <Value Type='Text'>" + searchInput + @"</Value>
-                                                            </Contains>
-                                                            <Contains>
-                                                                <FieldRef Name='Text'/>
-                                                                <Value Type='Text'>" + searchInput + @"</Value>
-                                                            </Contains>
-                                                        </Or>
-                                                    </And>
-                                                </Where>
-                                            </Query>
-                                        </View>";
+                    cQuery.ViewXml = CamlSearchQueryBuilder(searchInput);
                     var listItems = list.GetItems(cQuery);
                     clientContext.Load(listItems);
                     clientContext.ExecuteQuery();
@@ -252,6 +248,54 @@ namespace AnnonsAddinWeb.Controllers
                 }
             }
             return PartialView("_AuctionSearchPartial", model);
+        }
+
+        private string CamlSearchQueryBuilder(string searchInput)
+        {
+            string camlQuery = "";
+            if (string.IsNullOrEmpty(searchInput))
+            {
+                camlQuery = @"
+                                <View>
+                                    <Query>
+                                        <Where>
+                                            <Neq>
+                                                <FieldRef Name='Author' LookupId='True'/>
+                                                <Value Type='Integer'><UserID/></Value>
+                                                </Neq>
+                                        </Where>
+                                    </Query>
+                                </View>
+                            ";
+            }
+            else
+            {
+                camlQuery = @"
+                                <View>
+                                    <Query>
+                                        <Where>
+                                             <And>
+                                                <Neq>
+                                                    <FieldRef Name='Author' LookupId='True'/>
+                                                    <Value Type='Integer'><UserID/></Value>
+                                                </Neq>
+                                                <Or>
+                                                    <Contains>
+                                                        <FieldRef Name='Rubrik'/>
+                                                        <Value Type='Text'>" + searchInput + @"</Value>
+                                                    </Contains>
+                                                    <Contains>
+                                                        <FieldRef Name='Text'/>
+                                                        <Value Type='Text'>" + searchInput + @"</Value>
+                                                    </Contains>
+                                                </Or>
+                                            </And>
+                                        </Where>
+                                    </Query>
+                                </View>
+                            ";
+            }
+            return camlQuery;
         }
 
         public ActionResult ViewAuction(int id, string SpHostUrl)
@@ -288,10 +332,10 @@ namespace AnnonsAddinWeb.Controllers
                 return View(model);
             }
         }
-    
 
 
-    public ActionResult CreateAuction()
+
+        public ActionResult CreateAuction()
         {
             var model = new AdvertisementViewModel();
             var spContext = Session["SpContext"] as SharePointContext;
@@ -318,10 +362,10 @@ namespace AnnonsAddinWeb.Controllers
 
                         foreach (Term term in terms)
                         {
-                            SelectListItem newItem = new SelectListItem { Value = term.Id.ToString(), Text=term.Name };
+                            SelectListItem newItem = new SelectListItem { Value = term.Id.ToString(), Text = term.Name };
                             model.CategoryList.Add(newItem);
                         }
-                        
+
                     }
                 }
             }
@@ -331,6 +375,8 @@ namespace AnnonsAddinWeb.Controllers
         [HttpPost]
         public ActionResult PostAuction(AdvertisementViewModel model)
         {
+            if (!ModelState.IsValid)
+                return View(model);
             var spContext = Session["SpContext"] as SharePointContext;
             using (var clientContext = spContext.CreateUserClientContextForSPHost())
             {
