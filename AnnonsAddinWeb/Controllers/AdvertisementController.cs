@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using AnnonsAddinWeb.ViewModels;
+using System.Text;
 
 namespace AnnonsAddinWeb.Controllers
 {
@@ -201,15 +202,51 @@ namespace AnnonsAddinWeb.Controllers
 
         public ActionResult BuyAuctions()
         {
-            //SharePointContext spContext = Session["SpContext"] as SharePointContext;
-            //using (var clientContext = spContext.CreateUserClientContextForSPHost())
-            //{
+            var model = new SearchAdvertisementViewModel();
 
-            //}
-            return View();
+            model.FilterList.Add(new SelectListItem { Value = "PriceAsc", Text = "Pris (Stigande)" });
+            model.FilterList.Add(new SelectListItem { Value = "PriceDesc", Text = "Pris (Fallande)" });
+            model.FilterList.Add(new SelectListItem { Value = "DateAsc", Text = "Datum (Stigande)" });
+            model.FilterList.Add(new SelectListItem { Value = "DateDesc", Text = "Datum (Fallande)" });
+
+
+            SharePointContext spContext = Session["SpContext"] as SharePointContext;
+            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            {
+                TaxonomySession taxonomySession = TaxonomySession.GetTaxonomySession(clientContext);
+
+                if (taxonomySession != null)
+                {
+                    TermStore termStore = taxonomySession.GetDefaultSiteCollectionTermStore();
+                    TermGroupCollection termGroupCol = termStore.Groups;
+                    clientContext.Load(termGroupCol, t => t.Where(y => y.Name == "Advertisements"));
+                    clientContext.ExecuteQuery();
+
+                    TermGroup termGroup = termGroupCol.FirstOrDefault();
+                    if (termGroup != null)
+                    {
+                        TermSet termSet = termGroup.TermSets.GetByName("Categories");
+                        TermCollection terms = termSet.GetAllTerms();
+                        clientContext.Load(termSet);
+                        clientContext.Load(terms);
+                        clientContext.ExecuteQuery();
+
+                        foreach (Term term in terms)
+                        {
+                            SelectListItem newItem = new SelectListItem { Value = term.Name, Text = term.Name };
+                            model.CategoryList.Add(newItem);
+                        }
+
+                    }
+                }
+            }
+
+            model.CategoryList.OrderBy(x => x.Text);
+            model.CategoryList.Insert(0, new SelectListItem { Value = "Alla", Text = "Alla" });
+            return View(model);
         }
 
-        public PartialViewResult SearchAuctions(string searchInput)
+        public PartialViewResult SearchAuctions(SearchAdvertisementViewModel searchData)
         {
             var model = new List<AdvertisementViewModel>();
             SharePointContext spContext = Session["SpContext"] as SharePointContext;
@@ -226,7 +263,8 @@ namespace AnnonsAddinWeb.Controllers
                 if (list != null)
                 {
                     CamlQuery cQuery = new CamlQuery();
-                    cQuery.ViewXml = CamlSearchQueryBuilder(searchInput);
+
+                    cQuery.ViewXml = CamlSearchQueryBuilder(searchData.SearchText, searchData.SelectedCategory);
                     var listItems = list.GetItems(cQuery);
                     clientContext.Load(listItems);
                     clientContext.ExecuteQuery();
@@ -247,33 +285,54 @@ namespace AnnonsAddinWeb.Controllers
                     }
                 }
             }
+            if (searchData.SelectedFilter == "PriceAsc")
+            {
+                model.OrderBy(x => x.Price);
+            } else if(searchData.SelectedFilter == "PriceDesc")
+            {
+                model.OrderByDescending(x => x.Price);
+            }
+            else if (searchData.SelectedFilter == "DateAsc")
+            {
+                model.OrderBy(x => x.Date);
+            }
+            else if (searchData.SelectedFilter == "DateDesc")
+            {
+                model.OrderByDescending(x => x.Date);
+            }
             return PartialView("_AuctionSearchPartial", model);
         }
 
-        private string CamlSearchQueryBuilder(string searchInput)
+        private string CamlSearchQueryBuilder(string searchInput, string selectedCategory)
         {
-            string camlQuery = "";
-            if (string.IsNullOrEmpty(searchInput))
+            StringBuilder stringBuilder = new StringBuilder("<View><Query><Where>");
+            if (string.IsNullOrEmpty(searchInput) && selectedCategory == "Alla")
             {
-                camlQuery = @"
-                                <View>
-                                    <Query>
-                                        <Where>
-                                            <Neq>
+                stringBuilder.AppendLine(@"<Neq>
                                                 <FieldRef Name='Author' LookupId='True'/>
-                                                <Value Type='Integer'><UserID/></Value>
-                                                </Neq>
-                                        </Where>
-                                    </Query>
-                                </View>
-                            ";
+                                                <Value Type='Integer'>
+                                                    <UserID/>
+                                                </Value>
+                                            </Neq>");
             }
-            else
+            else if (string.IsNullOrEmpty(searchInput) && selectedCategory != "Alla")
             {
-                camlQuery = @"
-                                <View>
-                                    <Query>
-                                        <Where>
+                stringBuilder.AppendLine(@"<And>
+                                                <Neq>
+                                                    <FieldRef Name='Author' LookupId='True'/>
+                                                    <Value Type='Integer'>
+                                                        <UserID/>
+                                                    </Value>
+                                                </Neq>
+                                                <Eq>
+                                                    <FieldRef Name='Kategori'/>
+                                                    <Value Type='Text'>" + selectedCategory + @"</Value>
+                                                </Eq>
+                                            </And>");
+            }
+            else if (!string.IsNullOrEmpty(searchInput) && selectedCategory == "Alla")
+            {
+                stringBuilder.AppendLine(@"                                
                                              <And>
                                                 <Neq>
                                                     <FieldRef Name='Author' LookupId='True'/>
@@ -289,13 +348,38 @@ namespace AnnonsAddinWeb.Controllers
                                                         <Value Type='Text'>" + searchInput + @"</Value>
                                                     </Contains>
                                                 </Or>
-                                            </And>
-                                        </Where>
-                                    </Query>
-                                </View>
-                            ";
+                                            </And> 
+                            ");
             }
-            return camlQuery;
+            else if (!string.IsNullOrEmpty(searchInput) && selectedCategory != "Alla")
+            {
+                stringBuilder.AppendLine(@"                                
+                                             <And>
+                                                <Neq>
+                                                    <FieldRef Name='Author' LookupId='True'/>
+                                                    <Value Type='Integer'><UserID/></Value>
+                                                </Neq>
+                                                <And>
+                                                    <Or>
+                                                        <Contains>
+                                                            <FieldRef Name='Rubrik'/>
+                                                            <Value Type='Text'>" + searchInput + @"</Value>
+                                                        </Contains>
+                                                        <Contains>
+                                                            <FieldRef Name='Text'/>
+                                                            <Value Type='Text'>" + searchInput + @"</Value>
+                                                        </Contains>
+                                                    </Or>
+                                                    <Eq>
+                                                        <FieldRef Name='Kategori'/>
+                                                        <Value Type='Text'>" + selectedCategory + @"</Value>
+                                                    </Eq>
+                                                </And>
+                                            </And> 
+                            ");
+            }
+            stringBuilder.AppendLine("</Where></Query></View>");
+            return stringBuilder.ToString();
         }
 
         public ActionResult ViewAuction(int id, string SpHostUrl)

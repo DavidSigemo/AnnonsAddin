@@ -4,6 +4,23 @@
     ViewBag.Title = "Home Page";
 }
 
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var listItems = @Html.Raw(Json.Encode(Model));
+            $(document).on("click", ".btnEdit", function (e) {
+                var clickedListId = e.currentTarget.id.split("(")[1].split(")")[0];
+                var selectedListItem = listItems.filter(function(e){ return e.ListItemId == clickedListId})[0];
+
+                console.log(selectedListItem);
+                $("#editAdTitle").val(selectedListItem.Title);
+                $("#editAdText").val(selectedListItem.Text);
+                $("#editModal").modal()
+            });
+        });
+    </script>
+}
+
 <div class="container">
     <h3>Mina annonser</h3>
     <table class="table table-striped table-bordered table-hover table-responsive">
@@ -14,6 +31,7 @@
                 <th>Pris</th>
                 <th>Datum</th>
                 <th>Kategori</th>
+                <th class="text-center"><i class="fa fa-lg fa-pencil text-info" aria-hidden="true"></i></th>
                 <th class="text-center"><i class="fa fa-lg fa-ban text-danger" aria-hidden="true"></i></th>
             </tr>
         </thead>
@@ -27,10 +45,45 @@
                     <td>@listItem.Date.ToShortDateString()</td>
                     <td>@listItem.Category.Label</td>
                     <td class="text-center">
+                        <button class="btn btn-default btnEdit" id='btnEdit(@listItem.ListItemId)' @*onclick='location.href="@Url.Action("UpdateAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'*@>Ändra</button>
+                    </td>
+                    <td class="text-center">
                         <button class="btn btn-default" onclick='location.href="@Url.Action("DeleteAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'>Ta bort</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+</div>
+
+<div id="editModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Redigera annons</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-10 form-group">
+                        @Html.Label("editAdTitle", "Title")
+                        @Html.TextBox("editAdTitle",null,new { @Id = "editAdTitle", @Class = "form-control" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 form-group">
+                        @Html.Label("editAdText", "Text")
+                        @Html.TextBox("editAdText", null, new { @Id = "editAdText", @Class = "form-control" })
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Spara</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+
+    </div>
 </div>

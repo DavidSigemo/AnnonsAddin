@@ -1,4 +1,6 @@
-﻿@{
+﻿@using AnnonsAddinWeb.ViewModels
+@model SearchAdvertisementViewModel
+@{
     ViewBag.Title = "BuyAuctions";
 }
 <div class="container">
@@ -10,16 +12,24 @@
         UpdateTargetId = "auctionSearchResult"
     }, new { @Class = "row" }))
     {
-        <div class="col-md-4">
-            @Html.Label("searchInput", "Sök efter auktioner")
-            <div class="input-group">                
-                @Html.TextBox("searchInput", null, new { @Class = "form-control" })
-                <span class="input-group-btn">
-                    <input class="btn btn-primary" id="submitBtn" type="submit" value="Sök" />
-                </span>
-            </div>
+        <div class="col-md-3">
+            @Html.LabelFor(model => model.SearchText, "Sök efter auktioner")
+            @Html.TextBoxFor(model => model.SearchText, new { @Class = "form-control" })
+        </div>
+        <div class="col-md-3">
+            @Html.LabelFor(model => model.SelectedCategory, "Filtrera på kategorier")
+            @Html.DropDownListFor(model => model.SelectedCategory, new SelectList(Model.CategoryList, "Value", "Text"), new { @Class = "form-control" })
+        </div>
+        <div class="col-md-3">
+            @Html.LabelFor(model => model.SelectedFilter, "Sortera efter:")
+            @Html.DropDownListFor(model => model.SelectedFilter, new SelectList(Model.FilterList, "Value", "Text"), new { @Class = "form-control" })
+        </div>
+        <div class="col-md-3">
+            <input class="btn btn-lg btn-primary" id="submitBtn" type="submit" value="Sök" />
         </div>
     }
     <br />
-    <div class="row" id="auctionSearchResult"><h4>Search results...</h4></div>
+    <div class="row" id="auctionSearchResult">
+        <h4>Search results...</h4>
+    </div>
 </div>
