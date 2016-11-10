@@ -7,6 +7,8 @@ using System.Web;
 using System.Web.Mvc;
 using AnnonsAddinWeb.ViewModels;
 using System.Text;
+using Newtonsoft.Json;
+using System.Web.Script.Serialization;
 
 namespace AnnonsAddinWeb.Controllers
 {
@@ -200,6 +202,13 @@ namespace AnnonsAddinWeb.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult UpdateListItem(AdvertisementViewModel editedItem)
+        {
+            
+            return Json(editedItem, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult BuyAuctions()
         {
             var model = new SearchAdvertisementViewModel();
@@ -288,7 +297,8 @@ namespace AnnonsAddinWeb.Controllers
             if (searchData.SelectedFilter == "PriceAsc")
             {
                 model.OrderBy(x => x.Price);
-            } else if(searchData.SelectedFilter == "PriceDesc")
+            }
+            else if (searchData.SelectedFilter == "PriceDesc")
             {
                 model.OrderByDescending(x => x.Price);
             }

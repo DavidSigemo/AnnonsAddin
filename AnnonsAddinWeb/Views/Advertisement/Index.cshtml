@@ -13,9 +13,41 @@
                 var selectedListItem = listItems.filter(function(e){ return e.ListItemId == clickedListId})[0];
 
                 console.log(selectedListItem);
+                $("#editAdItemId").val(selectedListItem.ListItemId);
                 $("#editAdTitle").val(selectedListItem.Title);
                 $("#editAdText").val(selectedListItem.Text);
                 $("#editModal").modal()
+            });
+
+            $(document).on("click", "#saveEditAdBtn", function(){
+                console.log("test");
+                var listItemId = $("#editAdItemId").val();
+                var editedTitle = $("#editAdTitle").val();
+                var editedText = $("#editAdText").val();
+                var editedPrice = $("#editAdPrice").val();
+                var editedCategory = $("#editedAdCategory").val();
+
+                var editedListItem = {
+                    "ListItemId": listItemId,
+                    "Title": editedTitle, 
+                    "Text": editedText, 
+                    "Price": editedPrice,
+                    "SelectedCategory": editedCategory
+                };
+                var postDataJSON = JSON.stringify(editedListItem);
+                console.log(postDataJSON);
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("UpdateListItem", "Advertisement")",
+                    data: postDataJSON,
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (data){
+                        console.log("data posted, fix update fields");
+                    }
+                })
+
             });
         });
     </script>
@@ -64,12 +96,13 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Redigera annons</h4>
+                @Html.Hidden("editAdItemId")
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-10 form-group">
                         @Html.Label("editAdTitle", "Title")
-                        @Html.TextBox("editAdTitle",null,new { @Id = "editAdTitle", @Class = "form-control" })
+                        @Html.TextBox("editAdTitle", null, new { @Id = "editAdTitle", @Class = "form-control" })
                     </div>
                 </div>
                 <div class="row">
@@ -78,9 +111,29 @@
                         @Html.TextBox("editAdText", null, new { @Id = "editAdText", @Class = "form-control" })
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-10 form-group">
+                        @Html.Label("editAdPrice", "Pris")
+                        <div class="input-group">
+                            @Html.TextBox("editAdPrice", null, new { @Id = "editAdPrice", @Class = "form-control currency text-right", @Type = "number" })
+                            <span class="input-group-btn">SEK</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 form-group">
+                        @Html.Label("editAdCategory", "Text")
+                        @Html.DropDownList("editAdCategory", new List<SelectListItem>
+                            {
+                                new SelectListItem{ Text="Option 1", Value = "1" },
+                                new SelectListItem{ Text="Option 2", Value = "2" },
+                                new SelectListItem{ Text="Option 3", Value = "3" },
+                            }, new { @Id = "editAdText", @Class = "form-control" })
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Spara</button>
+                <button id="saveEditAdBtn" type="button" class="btn btn-default" data-dismiss="modal">Spara</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
             </div>
         </div>
