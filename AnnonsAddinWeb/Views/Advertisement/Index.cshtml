@@ -65,7 +65,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var listItem in Model)
+            @foreach (var listItem in Model.Advertisements)
             {
                 <tr>
                     <td>@listItem.Title</td>
@@ -120,12 +120,7 @@
                 <div class="row">
                     <div class="col-md-10 form-group">
                         @Html.Label("editAdCategory", "Text")
-                        @Html.DropDownList("editAdCategory", new List<SelectListItem>
-                            {
-                                new SelectListItem{ Text="Option 1", Value = "1" },
-                                new SelectListItem{ Text="Option 2", Value = "2" },
-                                new SelectListItem{ Text="Option 3", Value = "3" },
-                            }, new { @Id = "editAdText", @Class = "form-control" })
+                        @Html.DropDownList("editAdCategory", new SelectList(Model.Categories, "Value", "Text"), new { @Id = "editAdText", @Class = "form-control" })
                     </div>
                 </div>
             </div>

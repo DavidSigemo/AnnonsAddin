@@ -11,5 +11,11 @@ namespace AnnonsAddinWeb.ViewModels
         public List<AdvertisementViewModel> Advertisements { get; set; }
         public string SelectedCategory { get; set; }
         public List<SelectListItem> Categories { get; set; }
+
+        public IndexAdvertisementViewModel()
+        {
+            Advertisements = new List<AdvertisementViewModel>();
+            Categories = new List<SelectListItem>();
+        }
     }
 }
