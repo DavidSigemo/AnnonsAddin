@@ -79,7 +79,7 @@ namespace AnnonsAddinWeb.Controllers
 
                             foreach (Term term in terms)
                             {
-                                SelectListItem newItem = new SelectListItem { Value = term.Name, Text = term.Name };
+                                SelectListItem newItem = new SelectListItem { Value = term.Id.ToString(), Text = term.Name };
                                 model.Categories.Add(newItem);
                             }
 
@@ -223,7 +223,40 @@ namespace AnnonsAddinWeb.Controllers
         [HttpPost]
         public JsonResult UpdateListItem(AdvertisementViewModel editedItem)
         {
-            
+            var spContext = Session["SpContext"] as SharePointContext;
+            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            {
+                ListCollection listCol = clientContext.Web.Lists;
+                User currentUser = clientContext.Web.CurrentUser;
+                clientContext.Load(listCol, y => y.Where(x => x.Title == "Annonser"));
+                clientContext.Load(currentUser);
+                clientContext.ExecuteQuery();
+
+                var list = listCol.FirstOrDefault();
+                if (list != null)
+                {
+                    var listItem = list.GetItemById(editedItem.ListItemId);
+                    clientContext.Load(listItem);
+                    listItem["Rubrik"] = editedItem.Title;
+                    listItem["Text"] = editedItem.Text;
+                    listItem["Pris"] = editedItem.Price;
+                    listItem["Kategori"] = editedItem.SelectedCategory;
+
+                    listItem.Update();
+                    clientContext.ExecuteQuery();
+
+                    editedItem = new AdvertisementViewModel
+                    {
+                        Title = listItem["Rubrik"].ToString(),
+                        Text = listItem["Text"].ToString(),
+                        Price = int.Parse(listItem["Pris"].ToString()),
+                        Date = DateTime.Parse(listItem["Datum"].ToString()),
+                        User = listItem["Author"] as FieldUserValue,
+                        Category = listItem["Kategori"] as TaxonomyFieldValue,
+                        ListItemId = listItem["ID"].ToString()
+                    };
+                }
+            }
             return Json(editedItem, JsonRequestBehavior.AllowGet);
         }
 

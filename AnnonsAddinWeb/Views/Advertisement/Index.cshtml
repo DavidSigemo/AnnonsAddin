@@ -15,7 +15,11 @@
                 $("#editAdItemId").val(selectedListItem.ListItemId);
                 $("#editAdTitle").val(selectedListItem.Title);
                 $("#editAdText").val(selectedListItem.Text);
+                $("#editAdPrice").val(selectedListItem.Price);
+                $("#editAdCategory").val(selectedListItem.Category.TermGuid);
                 $("#editModal").modal()
+
+                console.log(listItems);
             });
 
             $(document).on("click", "#saveEditAdBtn", function(){
@@ -23,7 +27,7 @@
                 var editedTitle = $("#editAdTitle").val();
                 var editedText = $("#editAdText").val();
                 var editedPrice = $("#editAdPrice").val();
-                var editedCategory = $("#editedAdCategory").val();
+                var editedCategory = $("#editAdCategory").val();
 
                 var editedListItem = {
                     "ListItemId": listItemId,
@@ -41,7 +45,22 @@
                     contentType: "application/json",
                     dataType: "json",
                     success: function (data){
-                        console.log("data posted, fix update fields");
+                        var listItemRow = $('#listItems').find('[data-listItemId="' + data.ListItemId + '"]');
+                        console.log(listItemRow);
+                        var listItemTitle = $(listItemRow[0].children[0]);
+                        listItemTitle.text(data.Title);
+
+                        var listItemText = $(listItemRow[0].children[1]);
+                        listItemText.text(data.Text);
+
+                        var listItemPrice = $(listItemRow[0].children[2]);
+                        listItemPrice.text(data.Price);
+
+                        var listItemCategory = $(listItemRow[0].children[4]);
+                        listItemCategory.text(data.Category.Label);
+
+                        listItems = listItems.filter(function(e){return e.ListItemId != data.ListItemId});
+                        listItems.push(data);
                     }
                 })
 
@@ -64,17 +83,17 @@
                 <th class="text-center"><i class="fa fa-lg fa-ban text-danger" aria-hidden="true"></i></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="listItems">
             @foreach (var listItem in Model.Advertisements)
             {
-                <tr>
-                    <td>@listItem.Title</td>
-                    <td>@listItem.Text</td>
-                    <td>@listItem.Price SEK</td>
-                    <td>@listItem.Date.ToShortDateString()</td>
-                    <td>@listItem.Category.Label</td>
+                <tr id="listItemRow" data-listItemId="@listItem.ListItemId">
+                    <td class="listItemTitle">@listItem.Title</td>
+                    <td class="listItemText">@listItem.Text</td>
+                    <td class="listItemPrice">@listItem.Price SEK</td>
+                    <td class="listItemDate">@listItem.Date.ToShortDateString()</td>
+                    <td class="listItemCategory">@listItem.Category.Label</td>
                     <td class="text-center">
-                        <button class="btn btn-default btnEdit" data-id="@listItem.ListItemId" @*onclick='location.href="@Url.Action("UpdateAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'*@>Ändra</button>
+                        <button class="btn btn-default btnEdit" data-id="@listItem.ListItemId">Ändra</button>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-default" onclick='location.href="@Url.Action("DeleteAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'>Ta bort</button>
@@ -105,7 +124,7 @@
                 <div class="row">
                     <div class="col-md-10 form-group">
                         @Html.Label("editAdText", "Text")
-                        @Html.TextBox("editAdText", null, new { @Id = "editAdText", @Class = "form-control" })
+                        @Html.TextArea("editAdText", null, new { @Id = "editAdText", @Class = "form-control" })
                     </div>
                 </div>
                 <div class="row">
@@ -113,14 +132,14 @@
                         @Html.Label("editAdPrice", "Pris")
                         <div class="input-group">
                             @Html.TextBox("editAdPrice", null, new { @Id = "editAdPrice", @Class = "form-control currency text-right", @Type = "number" })
-                            <span class="input-group-btn">SEK</span>
+                            <span class="input-group-addon">SEK</span>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-10 form-group">
                         @Html.Label("editAdCategory", "Text")
-                        @Html.DropDownList("editAdCategory", new SelectList(Model.Categories, "Value", "Text"), new { @Id = "editAdText", @Class = "form-control" })
+                        @Html.DropDownList("editAdCategory", new SelectList(Model.Categories, "Value", "Text"), new { @Id = "editAdCategory", @Class = "form-control" })
                     </div>
                 </div>
             </div>
