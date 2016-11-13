@@ -1,5 +1,5 @@
 ﻿@using AnnonsAddinWeb.ViewModels
-@model IEnumerable<AdvertisementViewModel>
+@model IndexAdvertisementViewModel
 @{
     ViewBag.Title = "Home Page";
 }
@@ -7,12 +7,11 @@
 @section scripts {
     <script type="text/javascript">
         $(document).ready(function () {
-            var listItems = @Html.Raw(Json.Encode(Model));
+            var listItems = @Html.Raw(Json.Encode(Model.Advertisements));
             $(document).on("click", ".btnEdit", function (e) {
-                var clickedListId = e.currentTarget.id.split("(")[1].split(")")[0];
+                var clickedListId = $(e.target).data("id");
                 var selectedListItem = listItems.filter(function(e){ return e.ListItemId == clickedListId})[0];
 
-                console.log(selectedListItem);
                 $("#editAdItemId").val(selectedListItem.ListItemId);
                 $("#editAdTitle").val(selectedListItem.Title);
                 $("#editAdText").val(selectedListItem.Text);
@@ -20,7 +19,6 @@
             });
 
             $(document).on("click", "#saveEditAdBtn", function(){
-                console.log("test");
                 var listItemId = $("#editAdItemId").val();
                 var editedTitle = $("#editAdTitle").val();
                 var editedText = $("#editAdText").val();
@@ -29,13 +27,12 @@
 
                 var editedListItem = {
                     "ListItemId": listItemId,
-                    "Title": editedTitle, 
-                    "Text": editedText, 
+                    "Title": editedTitle,
+                    "Text": editedText,
                     "Price": editedPrice,
                     "SelectedCategory": editedCategory
                 };
                 var postDataJSON = JSON.stringify(editedListItem);
-                console.log(postDataJSON);
 
                 $.ajax({
                     type: "POST",
@@ -77,7 +74,7 @@
                     <td>@listItem.Date.ToShortDateString()</td>
                     <td>@listItem.Category.Label</td>
                     <td class="text-center">
-                        <button class="btn btn-default btnEdit" id='btnEdit(@listItem.ListItemId)' @*onclick='location.href="@Url.Action("UpdateAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'*@>Ändra</button>
+                        <button class="btn btn-default btnEdit" data-id="@listItem.ListItemId" @*onclick='location.href="@Url.Action("UpdateAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'*@>Ändra</button>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-default" onclick='location.href="@Url.Action("DeleteAdvertisement", "Advertisement", new { id = listItem.ListItemId, SpHostUrl = Session["SpHostUrl"] })"'>Ta bort</button>

@@ -17,7 +17,7 @@ namespace AnnonsAddinWeb.Controllers
         [SharePointContextFilter]
         public ActionResult Index()
         {
-            var model = new List<AdvertisementViewModel>();
+            var model = new IndexAdvertisementViewModel();
             var spContext = SharePointContextProvider.Current.GetSharePointContext(HttpContext);
             if (spContext != null)
             {
@@ -68,6 +68,22 @@ namespace AnnonsAddinWeb.Controllers
                             termGroup = annonsKategorierGroup;
                         }
                         #endregion
+
+                        if (termGroup != null)
+                        {
+                            TermSet termSet = termGroup.TermSets.GetByName("Categories");
+                            TermCollection terms = termSet.GetAllTerms();
+                            clientContext.Load(termSet);
+                            clientContext.Load(terms);
+                            clientContext.ExecuteQuery();
+
+                            foreach (Term term in terms)
+                            {
+                                SelectListItem newItem = new SelectListItem { Value = term.Name, Text = term.Name };
+                                model.Categories.Add(newItem);
+                            }
+
+                        }
                     }
 
                     var list = listCol.FirstOrDefault();
@@ -162,8 +178,10 @@ namespace AnnonsAddinWeb.Controllers
                             Category = listItem["Kategori"] as TaxonomyFieldValue,
                             ListItemId = listItem["ID"].ToString()
                         };
-                        model.Add(tempObj);
+                        model.Advertisements.Add(tempObj);
                     }
+
+
                 }
                 return View(model);
             }
