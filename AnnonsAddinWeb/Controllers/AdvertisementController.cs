@@ -514,6 +514,7 @@ namespace AnnonsAddinWeb.Controllers
                     }
                 }
             }
+            ModelState.Clear();
             return View(model);
         }
 

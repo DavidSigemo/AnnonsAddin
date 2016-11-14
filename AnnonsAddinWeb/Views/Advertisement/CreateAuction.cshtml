@@ -7,21 +7,21 @@
 
 <div class="container">
     <div class="jumbotron text-center">
-        @Html.ValidationSummary()
         @using (Html.BeginForm("PostAuction", "Advertisement", FormMethod.Post))
         {
+            @*@Html.ValidationSummary()*@
             <div class="row">
                 <div class="form-group col-md-4 col-md-offset-4">
                     @Html.LabelFor(model => model.Title)
                     @Html.TextBoxFor(model => model.Title, new { @Class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Title, "Title is required!", new { @Class = "control-label has-error" })
+                    @Html.ValidationMessageFor(model => model.Title, null, new { @Class = "control-label" })
                 </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-4 col-md-offset-4">
                     @Html.LabelFor(model => model.Text)
                     @Html.TextBoxFor(model => model.Text, new { @Class = "form-control" })
-                    @Html.ValidationMessageFor(model => model.Text, "Text is required!", new { @Class = "control-label has-error" })
+                    @Html.ValidationMessageFor(model => model.Text, null, new { @Class = "control-label" })
                 </div>
             </div>
             <div class="row">
@@ -31,7 +31,7 @@
                         @Html.TextBoxFor(model => model.Price, new { @Class = "form-control currency text-right", @Type = "number" })
                         <span class="input-group-addon">SEK</span>
                     </div>
-                    @Html.ValidationMessageFor(model => model.Text, "Price field is empty or is required!", new { @Class = "control-label has-error" })
+                    @Html.ValidationMessageFor(model => model.Price, null, new { @Class = "control-label" })
                 </div>
             </div>
             <div class="row">

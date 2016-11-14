@@ -12,11 +12,11 @@ namespace AnnonsAddinWeb.ViewModels
     public class AdvertisementViewModel
     {
         public string ListItemId { get; set; }
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Title is required!")]
+        [Required(ErrorMessage = "Title is required!")]
         public string Title { get; set; }
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Text is required!")]
+        [Required(ErrorMessage = "Text is required!")]
         public string Text { get; set; }
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Price is required!")]
+        [Required(ErrorMessage = "Price is required!")]
         [Range(0, 9999999, ErrorMessage = "Price is not in the allowed range!")]
         [DataType(DataType.Currency)]
         public int Price { get; set; }
