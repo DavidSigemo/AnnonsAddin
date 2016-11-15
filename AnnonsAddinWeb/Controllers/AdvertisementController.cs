@@ -187,6 +187,12 @@ namespace AnnonsAddinWeb.Controllers
             }
         }
 
+        public ActionResult RedirectToIndex(string SpHostUrl)
+        {
+            SpHostUrl = Session["SpHostUrl"].ToString();
+            return RedirectToAction("Index", new { SpHostUrl = SpHostUrl });
+        }
+
         private void GetTaxonomyFieldInfo(ClientContext clientContext, out Guid termStoreId, out Guid termSetId, string termSetName)
         {
             termStoreId = Guid.Empty;

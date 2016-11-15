@@ -5,10 +5,11 @@
     ViewBag.Title = "ViewAuction";
 }
 
-<h2>@Model.Title</h2>
-<h2>@Model.Text</h2>
-<h2>@Model.Price</h2>
-<h2>@Model.Date</h2>
-<h2>@Model.Category.Label</h2>
-<h2>@Model.User.LookupValue</h2>
-<h2>@Model.User.Email</h2>
+<div class="jumbotron">
+    <p>Rubrik: <strong>@Model.Title</strong></p>
+    <p>Text: <strong>@Model.Text</strong></p>
+    <p>Pris: <strong>@Model.Price</strong></p>
+    <p>Skapad: <strong>@Model.Date</strong></p>
+    <p>Kategori: <strong>@Model.Category.Label</strong></p>
+    <p>Skapad av: <strong>@Model.User.LookupValue (@Model.User.Email)</strong></p>
+</div>
